@@ -1,0 +1,19 @@
+{
+	"name": "default",
+	"layout" :
+	[
+		[
+			{ "content": "Some content.", "header": "Handle 1" },
+			{ "content": "<br/><b>Text above is fetched from the given url!</b>", "header": "http:/fiddle.jshell.net/css/normalize.css" },
+			{ "content": "Some content 3.", "header": "Handle 3" }
+		], 
+		[
+			{ "content": "Some content 4.", "header": "Handle 4" },
+			{ "content": "<hr><b>HTML tags works!</b>", "header": "Notice that..." }
+		], 
+		[
+			{ "content": "Some content 4.", "header": "Handle 5" },
+			{ "content": "<hr><b>HTML tags works!</b>", "header": "Handle 6" }
+		]
+	]
+}
