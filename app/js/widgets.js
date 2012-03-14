@@ -1,7 +1,7 @@
 angular.widget('@ui:panels', function(expression, element) {
   var compiler = this;
 
-  function buildPanels(scope, linkElement, model, updateExp)
+  function buildPanels(scope, linkElement, model)
   {
     if (angular.isDefined(model) && angular.isDefined(model.layout)) {
       var layout = model.layout;
@@ -11,7 +11,7 @@ angular.widget('@ui:panels', function(expression, element) {
         var columnElement = angular.element('<div class="ui-column ui-sortable"></div>');  
 
         for(var j=0, panels=model.layout[i].length; j<panels; j++) {
-          var panelElement = angular.element('<div class="dragbox" id=_panel_' + ((i*j)+j) + '></div>');
+          var panelElement = angular.element('<div class="dragbox"></div>');
 
           function getPanelContent(panel) {
             return panel.hasOwnProperty('content')
@@ -46,7 +46,7 @@ angular.widget('@ui:panels', function(expression, element) {
 
             buildPanels(linkElement, model);
             model.layout = newLayout;
-            scope.$eval();
+            scope.$digest();
           }
         });
 
@@ -56,9 +56,10 @@ angular.widget('@ui:panels', function(expression, element) {
   }
   
   return function(linkElement) {
-    this.$onEval(function() {
-      var model = this.$tryEval(element.attr('model'), linkElement);
-      buildPanels(this, linkElement, model);
-    }, linkElement);
+    var scope = this;
+    scope.$watch(element.attr('model'), function() { 
+      var model = scope.$eval(element.attr('model'), linkElement);
+      buildPanels(scope, linkElement, model);
+    });
   };
 });
