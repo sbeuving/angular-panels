@@ -8,7 +8,8 @@ angular.widget('@ui:panels', function(expression, element) {
       linkElement.empty();
 
       for(var i=0, cols=model.layout.length; i<cols; i++) {
-        var columnElement = angular.element('<div class="ui-column ui-sortable"></div>');  
+        var columnElement = angular.element('<div class="ui-column ui-sortable" style="width:'
+          + Math.floor(100 / cols) + '%;"></div>');  
 
         for(var j=0, panels=model.layout[i].length; j<panels; j++) {
           var panelElement = angular.element('<div class="dragbox"></div>');
@@ -19,7 +20,8 @@ angular.widget('@ui:panels', function(expression, element) {
               : (panel.hasOwnProperty('url') ? panel.url : '');
           }
 
-          panelElement.append('<h6>' +  model.layout[i][j].header + '</h6>');
+          panelElement.append('<h6>' +  model.layout[i][j].header 
+            + '<a class="close" style="float: right;">&times;</a></h6>');
           panelElement.append('<div>' + getPanelContent( model.layout[i][j]) + '</div>');
           panelElement.attr('ui-column-id', i);
           panelElement.attr('ui-panel-id', j);
@@ -27,8 +29,14 @@ angular.widget('@ui:panels', function(expression, element) {
         }
 
         columnElement.sortable({
-          opacity: 0.8,
+          opacity: 0.6,
           connectWith: ".ui-column",
+          placeholder: 'placeholder',
+          handle: 'h6',  
+          forcePlaceholderSize: true, 
+          revert: 300,
+          delay: 100,
+          containment: 'document',
           receive: function(event, ui) {
             var newLayout = [];
 

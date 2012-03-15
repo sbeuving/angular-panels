@@ -7,8 +7,8 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-	<title>AngularJS Panels</title>
-  
+	<title>AngularJS Panels - simple portal widget with RESTful backend</title>
+
 	<meta name="description" content="Angular widget for easy creation of portal-like floating panels with RESTful backend">
 	<meta name="author" content="Piotr Kukielka">
 	<meta name="viewport" content="width=device-width">
@@ -21,7 +21,9 @@
 	}
 	</style>
 	<link rel="stylesheet" href="app/css/bootstrap-responsive.css">
+  <link rel="stylesheet" href="app/css/prettify.css">
 	<link rel="stylesheet" href="app/css/style.css">
+  <link rel="stylesheet" href="app/css/gradient.css">
 
 	<script src="app/lib/modernizr-2.5.3-respond-1.1.0.min.js"></script>
 </head>
@@ -35,15 +37,16 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </a>
-        <a class="brand" href="https://github.com/pkukielka/angular-panels">
+        <a class="brand" href="http://pkukielka.github.com/angular-panels">
           AngularJS Panels
           <i class="icon-th-large icon-white"></i>
         </a>
         <div class="nav-collapse">
           <ul class="nav">
-            <li class="active"><a href="#demo">Demo</a></li>
+            <li class="active"><a href="#overview">Overview</a></li>
+            <li><a class="" href="#demo">Demo</a></li>
             <li><a class="" href="#documentation">Documentation</a></li>
-            <li><a class="" href="#acknowledgments">Acknowledgments</a></li>
+            <li><a class="" href="#roadmap">Roadmap</a></li>           
             <li><a class="" href="#contact">Contact</a></li>
           </ul>
         </div>
@@ -51,17 +54,51 @@
     </div>
   </div>
 
+  <!-- ================== Overview section  ================= -->
+  <div class="container" id="overview">
+    <div class="page-header">
+      <h1>Overview<small></small></h1>
+    </div>
+    <div class="row">
+      <div class="span6">
+        <p>
+          This project demonstrates usage of <a href="http://angularjs.org/">AngularJS</a>
+          to build simple portal system with floating panels. Drag'n'drop is supported thanks 
+          to usage of <a href="http://jqueryui.com/">JQuery UI</a>. To support proper binding 
+          between JQuery UI Sortable interface and AngularJS models I created custom widget 
+          which looks at DOM changes done by JQuery and map them properly back to AngularJS.
+          Also after any change in the model all the panels are re-created.
+        </p>
+        <p>
+          To make everything clean and easy to maintain I decided to use JSON for the models.
+          Except having benefit of being widely known and easy it also allow us to use great
+          AngularJS service component called <code>$resource</code>.
+          Using <code>$resource</code> service we can load any model directly from the server
+          and save it back with one line of code.
+        </p>
+      </div>
+      <div class="span6">
+        <p>
+          <a href="http://twitter.github.com/bootstrap/">Bootstrap, from Twitter</a> were used
+          to create documentation/demo page. Possibly soon - when I'll improve the widget - it 
+          will be used also for panels styling. 
+        </p>
+      </div>
+    </div>
+    <br>
+  </div>  
+
   <!-- ==================== Demo section ==================== -->
-  <div ng:app ng:controller="PanelsController" class="container" id="demo">
+  <div class="container" id="demo">
     <div class="page-header">
       <h1>Demo<small> Try if you like it</small></h1>
     </div>
 
     <div class="alert alert-info">
       Move panels around and try to edit JSON model to check
-      if all changes are properly propagated in both directions.
+      if changes are properly propagated in both directions.
     </div>
-    <div class="row">
+    <div ng:app ng:controller="PanelsController" class="row">
       <div class="span6">
         <div class="well">
           <div class="controls">
@@ -82,17 +119,213 @@
     <div class="page-header">
       <h1>Documentation</h1>
     </div>
+    <div class="row">
+      <div class="span8">
+        <p>
+          <span>
+            To understand how this component works you need to know AngularJS, at least a little.
+            In case of any doubts please look at <a href="http://docs.angularjs.org/#!/guide/">
+            AngularJS documentation</a>. 
+          </span>
+          <span>
+            The structure of the code is typical to every AngularJS application.
+            First of all, we need controller which will also contain our JSON model:
+          </span>
+        </p>
+
+<pre class="prettyprint linenums">
+var PortalController = function($resource) {
+  var scope = this;
+
+  scope.portalModel = $resource('app/models/:model', {model:'default.json'}).get();
+
+  scope.$watch('portalModel', function() { 
+    scope.portalModel.$save();
+  });
+};
+
+PortalController.$inject = ['$resource'];
+</pre>  
+
+        <p>
+          As you can see it's very easy to create model with full RESTful backend.
+          For more extensive documentation on how to use $resource service look at $resource
+          <a href="http://docs.angularjs.org/#!/api/angular.service.$resource">documentation</a>.
+          If you need to take any additional actions connected with model change just put them inside the watcher.
+          Please keep in mind that you are not forced to use any RESTful backend even if it's so easy.
+          You can for example use plain javascript object as a model and skip any saving:   
+        </p>
+
+<pre class="prettyprint linenums">
+var PortalController = function() {
+  this.portalModel = {
+    name: "Some name", 
+    layout: [
+      [
+        { header: "Header 1", content: "Content 1" },
+        { header: "Header 2", content: "Content 2" }
+      ], 
+      [
+        { header: "Header 3", content: "Content 3" },
+        { header: "Header 4", content: "Content 4" }
+      ]
+    ]
+  }
+};
+</pre> 
+
+        <p>
+          Ok, we have a proper controller, now it's time for our portal widget itself:        
+        </p>
+
+<pre class="prettyprint linenums">
+&ltdiv ng:app ng:controller="PortalController"&gt
+  &ltdiv ui:panels model="portalModel"&gt
+&lt/div&gt
+</pre>
+   
+        <p>
+          The only interesting thing which you can see there is custom tag <code>ui:panels</code>
+          which is a marker for our portal widget. <code>model</code> property is set to the name
+          of our model (which should be in JSON format).
+        </p>
+        <p>
+          The last thing which we need to do is to create JSON file with model:
+        </p>
+
+<pre class="prettyprint linenums">
+{
+  "name": "Name of your portal model",
+  "layout" :
+  [
+    [
+      { 
+        "header": "Panel 1", 
+        "content": "This is first panel, displayed in top left corner." 
+      },
+      {  
+        "header": "Panel 2", 
+        "content": "This is second panel, displayed in bottom left corner." 
+      }
+    ], [
+      { 
+        "header": "Panel 1", 
+        "content": "This is first panel, displayed in top right corner." 
+      },
+      {  
+        "header": "Panel 2", 
+        "content": "This is second panel, displayed in bottom right corner." 
+      }
+    ]
+  ]
+}
+</pre>  
+
+        <p>
+          As you can see structure looks like that:
+        </p>
+
+<pre class="prettyprint linenums">
+layout: [
+    column [
+        panel { header, content },
+        panel { header, content },
+        panel { header, content }
+    ],
+    column [
+        panel { header, content },
+        panel { header, content },
+        panel { header, content }
+    ]
+    column [
+        panel { header, content },
+        panel { header, content },
+        panel { header, content }
+    ]
+]
+</pre>  
+
+        <p>
+          Both <code>header</code> and <code>content</code> are strings and except plain text
+          can also contain HTML tags. HTML will be rendered properly inside the panel.
+          Right now there is no limit for columns or panels number.
+        </p>
+      </div>    
+    </div>
   </div>
 
-<script src="app/lib/jquery-1.7.1.min.js"></script>
-<script src="app/lib/jquery-ui-1.8.18.min.js"></script>
-<script src="app/lib/bootstrap/transition.js"></script>
-<script src="app/lib/bootstrap/collapse.js"></script>
-<script src="app/lib/bootstrap/scrollspy.js"></script>
-<script src="app/lib/angular/angular-0.10.6.js" ng:autobind></script>
-<script src="app/js/controllers.js"></script>
-<script src="app/js/widgets.js"></script>
-<script>$('#navbarMain').scrollspy()</script>
+  <!-- ================== Roadmap section ================== -->
+  <div class="container" id="roadmap">
+    <div class="page-header">
+      <h1>Roadmap<small> Hopefully it will be done sooner than later</small></h1>
+    </div>
+    <div class="row">
+      <div class="span8">
+        <table class="table ">
+          <thead>
+              <tr>
+                <th>#</th>
+                <th>Description</th>
+              </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Improve css styles for panels</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Add option to specify url as panel content (should be loaded dynamically)</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Add options to minimize, close and pin the panel</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Clean up the project structure to clearly separate presentation layer from library itself</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>  
+
+  <!-- =================== Contact section =================== -->
+  <div class="container" id="contact">
+    <div class="page-header">
+      <h1>Contact</h1>
+    </div>
+    <div class="row">
+      <div class="span8">
+        If you have any questions, suggestions, or need to contact me for and other reason just hit me on Twitter:
+        <p>
+          <div class="row">
+            <div class="span2 offset2">
+              <a href="https://twitter.com/pkukielka" class="twitter-follow-button" data-show-count="false">Follow @pkukielka</a>    
+            </div>
+            <div class="span2">
+              <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://pkukielka.github.com/angular-panels/" data-via="pkukielka">Tweet</a>
+            </div>
+          </div>
+
+          <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+        </p>
+      </div>
+    </div>
+  </div>  
+  <!-- ====================== Scripts ====================== -->
+  <script src="app/lib/jquery-1.7.1.min.js"></script>
+  <script src="app/lib/jquery-ui-1.8.18.min.js"></script>
+  <script src="app/lib/prettify/prettify.js"></script>
+  <script>$(function () { prettyPrint() })</script>
+  <script src="app/lib/bootstrap/transition.js"></script>
+  <script src="app/lib/bootstrap/collapse.js"></script>
+  <script src="app/lib/bootstrap/scrollspy.js"></script>
+  <script src="app/lib/angular/angular-0.10.6.js" ng:autobind></script>
+  <script src="app/js/controllers.js"></script>
+  <script src="app/js/widgets.js"></script>
+  <script>$('#navbarMain').scrollspy()</script>
 
 </body>
 </html>
