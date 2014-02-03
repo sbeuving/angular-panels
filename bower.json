@@ -1,10 +1,6 @@
 {
   "name": "angular-panels",
   "version": "1.0.0",
-  "homepage": "https://github.com/sbeuving/angular-panels",
-  "authors": [
-    "Stefan Beuving <stefanbeuving@gmail.com>"
-  ],
   "description": "Angular widget for easy creation of portal-like floating panels",
   "main": "app/js/controllers.js",
   "keywords": [
